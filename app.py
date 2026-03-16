@@ -1,5 +1,6 @@
 import random
 import streamlit as st
+from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score
 
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
@@ -28,23 +29,24 @@ def parse_guess(raw: str):
 
     return True, value, None
 
-
+#FIXME : Function is outputting incorrect hints on some attempts
 def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
 
+#FIXME : Logic in the conditional statements is incorrect, causing wrong hints to be shown
     try:
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📈 Go LOWER!"
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📉 Go HIGHER!"
     except TypeError:
         g = str(guess)
         if g == secret:
             return "Win", "🎉 Correct!"
         if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+            return "Too High", "📈 Go LOWER!"
+        return "Too Low", "📉 Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -74,7 +76,7 @@ st.sidebar.header("Settings")
 difficulty = st.sidebar.selectbox(
     "Difficulty",
     ["Easy", "Normal", "Hard"],
-    index=1,
+    index=0,
 )
 
 attempt_limit_map = {
@@ -92,8 +94,9 @@ st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
+#FIXME: The session state variables are not resetting properly when a new game starts, causing the game to not work as intended after the first game. 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -107,16 +110,23 @@ if "history" not in st.session_state:
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+    #FIXME: The range information should change depending on what difficulty the user selected, so the range information is taken from the variables low and high.
+    f"Guess a number between {low} and {high}. "
+    #FIXME: The attempts left is not updating correctly after each guess, so this information is deleted from the message.
+    #f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
-with st.expander("Developer Debug Info"):
-    st.write("Secret:", st.session_state.secret)
-    st.write("Attempts:", st.session_state.attempts)
-    st.write("Score:", st.session_state.score)
-    st.write("Difficulty:", difficulty)
-    st.write("History:", st.session_state.history)
+#FIXME : The debug info is showing the secret number even when the user still has attempts, which should not happen.
+#FIXME: The Develop Debug Info is shown to the user when it shouldn't be, so this information is deleted. 
+#with st.expander("Developer Debug Info"):
+#    if st.session_state.status == "playing":
+#        st.write("Secret: ????")
+#    else:
+#        st.write("Secret:", st.session_state.secret)
+#    st.write("Attempts:", st.session_state.attempts)
+#    st.write("Score:", st.session_state.score)
+#    st.write("Difficulty:", difficulty)
+#    st.write("History:", st.session_state.history)
 
 raw_guess = st.text_input(
     "Enter your guess:",
@@ -131,9 +141,11 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+#FIXME: The new game button is not resetting the session state vvariable back to playing when clicked, causing the game to not start again after the first game is over.
 if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)
+    st.session_state.status = "playing"
     st.success("New game started.")
     st.rerun()
 
@@ -155,12 +167,8 @@ if submit:
     else:
         st.session_state.history.append(guess_int)
 
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
-
-        outcome, message = check_guess(guess_int, secret)
+        #FIXME: The secret number is converted to a string on an even attempt, which causes the check_guess function to give incorrect hints on the next attempts. so the logic was deleted.
+        outcome, message = check_guess(guess_int, st.session_state.secret)
 
         if show_hint:
             st.warning(message)
@@ -186,6 +194,9 @@ if submit:
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
                 )
+
+#FIXME: The attempts left should appear after each guess and after each guess is validated. 
+f"Attempts left: {attempt_limit - st.session_state.attempts}"
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")
