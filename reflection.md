@@ -40,22 +40,16 @@ Claude did help me design my tests by including assert in my tests instead of me
 
 ---
 
-## CLEAR SUMMARY OF REPAIRS - written by Claude (I was not sure what to do since I am not using Copilot, but was told it is okay to use Claude.)
-Fix game glitches: correct hint directions, fix attempt counting, hide debug info, and reset new game state
-
-Swapped incorrect "Go HIGHER/LOWER" hints in check_guess function
-Fixed attempts initialization and display to update after each guess
-Commented out developer debug info to prevent secret number exposure
-Corrected new game button to properly reset session state variables
-Refactored game logic into logic_utils.py for better organization
-Updated tests to handle tuple returns from check_guess function
-
-
 ## 4. What did you learn about Streamlit and state?
 
 - In your own words, explain why the secret number kept changing in the original app.
+The secret number kept changing in the original app because when there is an interaction with the website, the Python code reruns from the start of the code. Within the code, the secret number was randomly generated, so when the page refreshes, the secret number would update and no longer be the same. From my understanding, this is just how Streamlit works. This bug really defeated the whole point of the game because it was unbeatable since the player would be guessing a secret number that is no longer the secret number.
+
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+I would explain reruns as when you accidentally switch tabs on a phone and when you go to the tab you were just on, you see it start up again so what you were doing is not right there so now you have to go and find it again. Essentially, a rerun starts from the top of the code when it detects any interaction with the code. A session state is like a saved draft or post on social media because when you hit save, the app knows that it must hold onto that information and shouldn't get rid of it. It holds onto it unti the user says it doesn't need it anymore. Essentially, a session state allows the code to remember some key aspects (in the game, the secret number or score) that shoud not be forgotten when a rerun happens.
+
 - What change did you make that finally gave the game a stable secret number?
+The secret number becomes stable because it is stored into the session state where it first checks if the secret number has not been saved. If it hasn't, then it randomly generates a secret number within the range that the difficulty the user chose states. If it has saved one already, then it skips this if statement and keeps the existing secret number. This prevents the code from updating the secret number when a new interaction occurs with the website, allowing the secret number to stay the same until the game is over. 
 
 ---
 
@@ -63,5 +57,10 @@ Updated tests to handle tuple returns from check_guess function
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
+One habit I used in this project was prompting AI for specific output formats. This proved to be helpful because a lot of the time when AI has to go through a lot of information and context, it throws back a bunch of information back to the user. However, prompting Claude to format its explanations in small paragraphs and mainly bullet points made it easier for me to comprehend the logic and know where to look in my code exactly if it didn't immediately suggest an edit. 
+
 - What is one thing you would do differently next time you work with AI on a coding task?
+One thing I would do differently next time I work with AI on a coding task is breaking the code into smaller pieces for the AI to look at and understand. The AI looked at a lot of context because the file was a long piece of code and I noticed this with the amount of time it took for Claude to respond to me. Next time, I should suggest Claude to look at smaller pieces of code (like a function or an if-else conditional statement) so it can focus on that one part without bringing up new or old bugs that may not be relevant to fixing the one at hand.
+
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+This project really showed me that AI generated code can appear to be right, but it is always best for a human to inspect the logic concerns with the code and make sure the code actually makes sense as a whole (from smaller pieces of code to the whole block of code). It allowed me to test my code comprehension skills as I made sure Claude was offering actual support that helped push the game in the right direction.
